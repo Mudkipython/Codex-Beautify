@@ -1,0 +1,33 @@
+name: Windows build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build and run headless tests
+        shell: powershell
+        run: ./scripts/test.ps1
+      - name: Package with bundled demo video
+        shell: powershell
+        run: ./scripts/package.ps1
+      - name: Check repository and package
+        shell: powershell
+        run: ./scripts/verify-repository.ps1
+      - uses: actions/upload-artifact@v7
+        with:
+          name: DragonCodexBoot-windows-x64
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
